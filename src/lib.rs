@@ -13,9 +13,7 @@ use crate::args::EntityType::{Locate, Search};
 
 pub fn run() -> Result<OperationResult, Box<dyn Error>> {
     let minigrep_args = MinigrepArgs::parse();
-    print!("{:#?}", minigrep_args);
     let config = convert(minigrep_args);
-    print!("{} \n {} \n {} \n {:?} \n", config.is_locate, config.query_or_filename, config.case_insensitive, config.dir);
     
     let result = search(
         config.is_locate,
@@ -49,7 +47,7 @@ pub fn convert(args: MinigrepArgs) -> Config {
         }
         Search(command) => {
             config.query_or_filename = command.search_query;
-            config.case_insensitive = command.search_case_insensitve;
+            config.case_insensitive = command.search_case_insensitive;
 
             match command.command {
                 args::SearchSubcommand::All => {},
@@ -153,8 +151,6 @@ pub fn search(is_locate: bool, query_or_filename: &str, case_insensitive: bool, 
         }
     }
 
-    println!("search dir: {:#?}", search_dir);
-
     for name in search_dir {
         for e in WalkDir::new(name).into_iter().filter_map(|e| e.ok()) {
             result.files_count += 1;
@@ -165,12 +161,11 @@ pub fn search(is_locate: bool, query_or_filename: &str, case_insensitive: bool, 
 
                 if !is_locate {
                     let search_result: SearchResult;
-                    println!("Aktuelle Datei: {}", e.path().display().to_string());
-                    let contents = match fs::read_to_string(e.file_name()) {
+                    let contents = match fs::read_to_string(e.path()) {
                         Err(_e) => {continue}
                         Ok(value) => {value}
                     };
-            
+
                     if case_insensitive {
                         search_result = search_case_insensitive(query_or_filename, &contents);
                     } else {
