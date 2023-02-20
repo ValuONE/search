@@ -16,11 +16,5 @@ fn main() {
         }
     };
 
-    println!("is locate: {} \n filenames: {:#?} \n content {:#?} \n lines {:#?} \n {}",
-        result.is_locate,
-        result.filename,
-        result.content,
-        result.line,
-        result.files_count
-    );
+    minigrep::display_results(result);
 }
