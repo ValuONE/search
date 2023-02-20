@@ -64,7 +64,7 @@ pub fn convert(args: MinigrepArgs) -> Config {
                     config.dir.push(select.dir);
                 }
             }
-        }
+        },
         Search(command) => {
             config.query_or_filename = command.search_query;
             config.case_insensitive = command.search_case_insensitive;
@@ -97,6 +97,7 @@ Thanks for using minigrep! Mady by Valu
 
     ");
 }
+
 pub struct Config {
     pub is_locate: bool,
     pub query_or_filename: String,
@@ -188,6 +189,7 @@ pub fn search(is_locate: bool, query_or_filename: &str, case_insensitive: bool, 
                 "▪▪▪▪▪",
             ]),
     );
+
     pb.set_message("Searching for files...");
     let started = Instant::now();
 
