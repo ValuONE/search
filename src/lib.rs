@@ -217,7 +217,7 @@ static HARD_DRIVE_NAMES: [&str; 26] = [
     "U:\\", "V:\\", "W:\\", "X:\\", "Y:\\", 
     "Z:\\",
 ];
-/*
+
 #[cfg(test)]
 mod test {
     use super::*;
@@ -230,7 +230,12 @@ Rust:
 safe, fast, productive.
 Pick three.";
 
-        assert_eq!(vec!["safe, fast, productive."], search(query, contents));
+        assert_eq!(
+            vec![
+                "safe, fast, productive."
+            ],
+            search_case_sensitive(query, contents).content
+        );
     }
 
     #[test]
@@ -242,6 +247,9 @@ safe, fast, productive.
 Pick three.
 Trust me.";
 
-        assert_eq!(vec!["Rust:", "Trust me."], search_case_insensitive(query, contents));
+        assert_eq!(
+            vec!["Rust:", "Trust me."],
+            search_case_insensitive(query, contents).content
+        );
     }
-}*/
+}
