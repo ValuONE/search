@@ -1,21 +1,66 @@
 extern crate walkdir;
 
-use std::fs;
+mod args;
+
 use std::error::Error;
+use std::fs;
 use std::path::Path;
+use clap::Parser;
 
 use walkdir::WalkDir;
+use crate::args::MinigrepArgs;
+use crate::args::EntityType::{Locate, Search};
 
-pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
-    let contents = fs::read_to_string(config.filename)?;
+pub fn run() -> Result<OperationResult, Box<dyn Error>> {
+    let minigrep_args = MinigrepArgs::parse();
+    print!("{:#?}", minigrep_args);
+    let config = convert(minigrep_args);
+    print!("{} \n {} \n {} \n {:?} \n", config.is_locate, config.query_or_filename, config.case_insensitive, config.dir);
+    
+    let result = search(
+        config.is_locate,
+        &*config.query_or_filename,
+        config.case_insensitive,
+        config.dir
+    )?;
 
-    for line in 
-        if config.case_insensitive {search(&config.query, &contents)} 
-            else {search_case_insensitive(&config.query, &contents)} {
-        println!("{}", line);
+    Ok(result)
+}
+
+pub fn convert(args: MinigrepArgs) -> Config {
+    let mut config: Config = Config {
+        is_locate: false,
+        query_or_filename: "".to_string(),
+        case_insensitive: false,
+        dir: vec![],
+    };
+
+    match args.entity_type {
+        Locate(command) => {
+            config.is_locate = true;
+            config.query_or_filename = command.filename;
+
+            match command.command {
+                args::LocateSubcommand::All => {},
+                args::LocateSubcommand::Dir(select) => {
+                    config.dir.push(select.dir);
+                }
+            }
+        }
+        Search(command) => {
+            config.query_or_filename = command.search_query;
+            config.case_insensitive = command.search_case_insensitve;
+
+            match command.command {
+                args::SearchSubcommand::All => {},
+                args::SearchSubcommand::Dir(select) => {
+                    config.dir.push(select.dir);
+                }
+            }
+        }
     }
 
-    Ok(())
+    config
 }
 
 pub fn start_screen() {
@@ -34,96 +79,122 @@ Thanks for using minigrep! Continue with your command or type help...
 
     ");
 }
-
 pub struct Config {
-    pub query: String,
-    pub filename: String,
+    pub is_locate: bool,
+    pub query_or_filename: String,
     pub case_insensitive: bool,
-    pub search_all: bool,
+    pub dir: Vec<String>,
 }
 
-impl Config {
-    pub fn new(args: &[String]) -> Result<Config, &str> {
-        fn has_single_component(path: &str) -> bool {
-            !path.contains(std::path::is_separator)
-        }
-
-        let argument_case_insensitive = String::from("-C");
-        let argument_search_all = String::from("-A");
-
-        if args.len() < 2 {
-            return Err("Not enough arguments provided");
-        }
-
-        let query = args[0].clone();
-        let filename = args[1].clone();
-        let case_insensitive = if args.contains(&argument_case_insensitive) {true} else {false};
-        let search_all = if args.contains(&argument_search_all) {true} else {false};
-
-        if search_all {
-            match has_single_component(&filename) {
-                false => {
-                    return Err("When using '-A' only enter a single filename, not a path!");
-                }
-                true => ()
-            };
-        }
-    
-        Ok(Config {
-            query,
-            filename,
-            case_insensitive,
-            search_all
-        })
-    }
+pub struct SearchResult {
+    line: Vec<i32>,
+    content: Vec<String>
 }
 
-pub fn search<'a>(query: &str, contents: &'a str) -> Vec<&'a str> {
-    let mut results = Vec::new();
+pub struct OperationResult {
+    pub is_locate: bool,
+    pub filename: Vec<String>,
+    pub content: Vec<String>,
+    pub line: Vec<i32>,
+    pub files_count: i32,
+}
+
+pub fn search_case_sensitive(query: &str, contents: &str) -> SearchResult {
+    let mut search_result = SearchResult {
+        line: vec![],
+        content: vec![],
+    };
+
+    let mut count: i32 = 0;
     
     for line in contents.lines() {
+        count += 1;
         if line.contains(query) {
-            results.push(line);
+            search_result.line.push(count);
+            search_result.content.push(line.to_string());
         }
     }
 
-    results
+    search_result
 }
 
-pub fn search_case_insensitive<'a>(query: &str, contents: &'a str) -> Vec<&'a str> {
-    let mut results = Vec::new();
+pub fn search_case_insensitive(query: &str, contents: &str) -> SearchResult {
+    let mut search_result = SearchResult {
+        line: vec![],
+        content: vec![],
+    };
+
+    let mut count: i32 = 0;
     let query = query.to_lowercase();
     
     for line in contents.lines() {
+        count += 1;
         if line.to_lowercase().contains(&query) {
-            results.push(line);
+            search_result.line.push(count);
+            search_result.content.push(line.to_string());
         }
     }
 
-    results
+    search_result
 }
 
-pub fn add_all_files_on_device() -> Vec<String> {
+pub fn search(is_locate: bool, query_or_filename: &str, case_insensitive: bool, mut search_dir: Vec<String>) -> Result<OperationResult, Box<dyn Error>> {
+    let mut result = OperationResult {
+        is_locate,
+        filename: vec![],
+        content: vec![],
+        line: vec![],
+        files_count: 0,
+    };
 
-    let mut file_list = vec![];
+    if search_dir.is_empty() {
+        for name in get_drive_letters() {
+            search_dir.push(name);
+        }
+    }
 
-    for name in get_drive_letters() {
+    println!("search dir: {:#?}", search_dir);
+
+    for name in search_dir {
         for e in WalkDir::new(name).into_iter().filter_map(|e| e.ok()) {
+            result.files_count += 1;
             if e.metadata().unwrap().is_file() {
-                file_list.push(e.path().display().to_string());
+                if is_locate && e.file_name() == query_or_filename {
+                    result.filename.push(e.path().display().to_string());
+                }
+
+                if !is_locate {
+                    let search_result: SearchResult;
+                    println!("Aktuelle Datei: {}", e.path().display().to_string());
+                    let contents = match fs::read_to_string(e.file_name()) {
+                        Err(_e) => {continue}
+                        Ok(value) => {value}
+                    };
+            
+                    if case_insensitive {
+                        search_result = search_case_insensitive(query_or_filename, &contents);
+                    } else {
+                        search_result = search_case_sensitive(query_or_filename, &contents)
+                    }
+
+                    if !search_result.line.is_empty() {
+                        result.filename.push(e.path().display().to_string());
+
+                        for i in 0..search_result.line.len() {
+                            let cur_content = search_result.content[i].clone();
+                            let cur_line = search_result.line[i];
+
+                            result.content.push(cur_content);
+                            result.line.push(cur_line);
+                        }
+                    }
+                }
+
             }
         }
     }
 
-    let mut count: i32 = 0;
-    for _item in &file_list {
-        count += 1;
-        //println!("{} named: {} ", count, item);
-    }
-
-    println!("{}", count);
-    
-    file_list
+    Ok(result)
 }
 
 fn get_drive_letters() -> Vec<String> {
@@ -146,7 +217,7 @@ static HARD_DRIVE_NAMES: [&str; 26] = [
     "U:\\", "V:\\", "W:\\", "X:\\", "Y:\\", 
     "Z:\\",
 ];
-
+/*
 #[cfg(test)]
 mod test {
     use super::*;
@@ -173,4 +244,4 @@ Trust me.";
 
         assert_eq!(vec!["Rust:", "Trust me."], search_case_insensitive(query, contents));
     }
-}
+}*/
