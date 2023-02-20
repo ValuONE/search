@@ -10,6 +10,9 @@ use clap::Parser;
 use walkdir::WalkDir;
 use crate::args::MinigrepArgs;
 use crate::args::EntityType::{Locate, Search};
+use std::time::{Duration, Instant};
+
+use indicatif::{HumanDuration, ProgressBar, ProgressStyle};
 
 pub fn run() -> Result<OperationResult, Box<dyn Error>> {
     let minigrep_args = MinigrepArgs::parse();
@@ -23,6 +26,23 @@ pub fn run() -> Result<OperationResult, Box<dyn Error>> {
     )?;
 
     Ok(result)
+}
+
+pub fn display_results(results: OperationResult) {
+    if results.is_locate {
+        println!("Found the specified filename {} time(s): \n", results.filename.len());
+    } else {
+        println!("Found the specified string {} time(s): \n", results.line.len());
+    }
+
+    for i in 0..results.filename.len() {
+        if results.is_locate {
+            println!("> {} \n", results.filename[i]);
+        } else {
+            println!("> {}", results.filename[i]);
+            println!("--> in line {}: {} \n", results.line[i], results.content[i])
+        }
+    }
 }
 
 pub fn convert(args: MinigrepArgs) -> Config {
@@ -71,7 +91,7 @@ pub fn start_screen() {
     /_/  /_/___/_/ |_/___/\____/_/ |_/_____/_/      
    
                                                 
-Thanks for using minigrep! Continue with your command or type help...
+Thanks for using minigrep! Mady by Valu
 
 -------------------------------------------------------------------------
 
@@ -94,7 +114,7 @@ pub struct OperationResult {
     pub filename: Vec<String>,
     pub content: Vec<String>,
     pub line: Vec<i32>,
-    pub files_count: i32,
+    pub files_count: u64,
 }
 
 pub fn search_case_sensitive(query: &str, contents: &str) -> SearchResult {
@@ -145,14 +165,35 @@ pub fn search(is_locate: bool, query_or_filename: &str, case_insensitive: bool, 
         files_count: 0,
     };
 
+    let mut not_locate = vec![];
+
     if search_dir.is_empty() {
         for name in get_drive_letters() {
             search_dir.push(name);
         }
     }
 
+    let pb = ProgressBar::new_spinner();
+    pb.enable_steady_tick(Duration::from_millis(120));
+    pb.set_style(
+        ProgressStyle::with_template("{spinner:.blue} {msg}")
+            .unwrap()
+            .tick_strings(&[
+                "▹▹▹▹▹",
+                "▸▹▹▹▹",
+                "▹▸▹▹▹",
+                "▹▹▸▹▹",
+                "▹▹▹▸▹",
+                "▹▹▹▹▸",
+                "▪▪▪▪▪",
+            ]),
+    );
+    pb.set_message("Searching for files...");
+    let started = Instant::now();
+
     for name in search_dir {
         for e in WalkDir::new(name).into_iter().filter_map(|e| e.ok()) {
+
             result.files_count += 1;
             if e.metadata().unwrap().is_file() {
                 if is_locate && e.file_name() == query_or_filename {
@@ -160,33 +201,52 @@ pub fn search(is_locate: bool, query_or_filename: &str, case_insensitive: bool, 
                 }
 
                 if !is_locate {
-                    let search_result: SearchResult;
-                    let contents = match fs::read_to_string(e.path()) {
-                        Err(_e) => {continue}
-                        Ok(value) => {value}
-                    };
-
-                    if case_insensitive {
-                        search_result = search_case_insensitive(query_or_filename, &contents);
-                    } else {
-                        search_result = search_case_sensitive(query_or_filename, &contents)
-                    }
-
-                    if !search_result.line.is_empty() {
-                        result.filename.push(e.path().display().to_string());
-
-                        for i in 0..search_result.line.len() {
-                            let cur_content = search_result.content[i].clone();
-                            let cur_line = search_result.line[i];
-
-                            result.content.push(cur_content);
-                            result.line.push(cur_line);
-                        }
-                    }
+                    not_locate.push(e.path().display().to_string())
                 }
-
             }
         }
+    }
+
+    pb.finish_with_message(format!("Done in {} \n", HumanDuration(started.elapsed())));
+
+
+    if !is_locate {
+        println!("\n Searching in files now...\n");
+
+        let pb = ProgressBar::new(result.files_count);
+
+        for e in not_locate {
+            pb.inc(1);
+            if !is_locate {
+                let search_result: SearchResult;
+                let contents = match fs::read_to_string(&e) {
+                    Err(_e) => {continue}
+                    Ok(value) => {value}
+                };
+
+                if case_insensitive {
+                    search_result = search_case_insensitive(query_or_filename, &contents);
+                } else {
+                    search_result = search_case_sensitive(query_or_filename, &contents)
+                }
+
+                if !search_result.line.is_empty() {
+                    result.filename.push(e.to_string());
+
+                    for i in 0..search_result.line.len() {
+                        let cur_content = search_result.content[i].clone();
+                        let cur_line = search_result.line[i];
+
+                        result.content.push(cur_content);
+                        result.line.push(cur_line);
+                    }
+                }
+            }
+        }
+
+        pb.finish();
+
+        println!("{} files searched in {:?}", result.files_count, pb.elapsed());
     }
 
     Ok(result)
