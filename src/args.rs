@@ -1,7 +1,7 @@
 use clap:: {
     Args,
     Parser,
-    Subcommand
+    Subcommand,
 };
 
 #[derive(Debug, Parser)]
@@ -21,8 +21,10 @@ pub enum EntityType {
 
 #[derive(Debug, Args)]
 pub struct LocateCommand {
+    /// Enter the file name that should be located
     pub filename: String,
     #[clap(subcommand)]
+    /// Specify the location further
     pub command: LocateSubcommand
 }
 
@@ -41,8 +43,13 @@ pub struct SelectDirCommand {
 
 #[derive(Debug, Args)]
 pub struct SearchCommand {
+    /// Enter the string that should be searched
     pub search_query: String,
+    /// Search case insensitive [default value = true]
+    #[clap(short, long, default_value_t = true)]
+    pub search_case_insensitve: bool,
     #[clap(subcommand)]
+    /// Specify the search further
     pub command: SearchSubcommand,
 }
 
