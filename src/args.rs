@@ -46,8 +46,8 @@ pub struct SearchCommand {
     /// Enter the string that should be searched
     pub search_query: String,
     /// Search case insensitive [default value = true]
-    #[clap(short, long, default_value_t = true)]
-    pub search_case_insensitve: bool,
+    #[clap(short, long)]
+    pub search_case_insensitive: bool,
     #[clap(subcommand)]
     /// Specify the search further
     pub command: SearchSubcommand,
