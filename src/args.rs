@@ -32,7 +32,7 @@ pub struct LocateCommand {
 pub enum LocateSubcommand {
     /// Search in a specified directory
     Dir(SelectDirCommand),
-    /// Search your whole computer (might take a while)
+    /// Search your whole computer (it takes long)
     All
 }
 
@@ -57,6 +57,6 @@ pub struct SearchCommand {
 pub enum SearchSubcommand {
     /// Search in a specified directory
     Dir(SelectDirCommand),
-    /// Search your whole computer (might take a while)
+    /// Search your whole computer (it takes very (very) long)
     All
 }
