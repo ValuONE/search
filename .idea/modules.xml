@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/minigrep.iml" filepath="$PROJECT_DIR$/.idea/minigrep.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/search.iml" filepath="$PROJECT_DIR$/.idea/search.iml" />
     </modules>
   </component>
 </project>
