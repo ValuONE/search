@@ -6,7 +6,7 @@ use std::error::Error;
 use std::path::Path;
 use clap::Parser;
 
-use walkdir::WalkDir;
+use jwalk::{Parallelism};
 use crate::args::SearchArgs;
 use crate::args::EntityType::{Locate, Find};
 use std::time::{Duration, Instant};
@@ -192,23 +192,28 @@ pub fn search(is_locate: bool, query_or_filename: &str, case_insensitive: bool, 
     let started = Instant::now();
 
     for name in search_dir {
-        for e in WalkDir::new(name).into_iter().filter_map(|e| e.ok()) {
+        jwalk::WalkDir::new(name)
+            .parallelism(Parallelism::RayonNewPool(0))
+            .into_iter()
+            .filter_map(|e| {
+                result.files_count += 1;
+                let dir_entry = e.ok()?;
+                if dir_entry.file_type().is_file() {
+                    if is_locate && dir_entry.file_name() == query_or_filename {
+                        result.filename.push(dir_entry.path().display().to_string());
+                    }
 
-            result.files_count += 1;
-            if e.metadata().unwrap().is_file() {
-                if is_locate && e.file_name() == query_or_filename {
-                    result.filename.push(e.path().display().to_string());
-                }
+                    if !is_locate {
+                        not_locate.push(dir_entry.path().display().to_string())
+                    }
 
-                if !is_locate {
-                    not_locate.push(e.path().display().to_string())
+                    return Some(true);
                 }
-            }
-        }
+                None
+        }).count();
     }
 
-    pb.finish_with_message(format!("Done in {} \n", HumanDuration(started.elapsed())));
-
+    pb.finish_with_message(format!("Scanned through {} files in {} \n", result.files_count,HumanDuration(started.elapsed())));
 
     if !is_locate {
         println!("\n Searching in files now...\n");
