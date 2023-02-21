@@ -6,7 +6,7 @@ use clap:: {
 
 #[derive(Debug, Parser)]
 #[clap(author, version, about)]
-pub struct MinigrepArgs{
+pub struct SearchArgs {
     #[clap(subcommand)]
     pub entity_type: EntityType
 }
