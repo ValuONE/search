@@ -15,8 +15,8 @@ pub struct SearchArgs {
 pub enum EntityType {
     /// Locate a file on your computer
     Locate(LocateCommand),
-    /// Search for a string in a file
-    Search(SearchCommand),
+    /// Find a string in a file
+    Find(FindCommand),
 }
 
 #[derive(Debug, Args)]
@@ -42,7 +42,7 @@ pub struct SelectDirCommand {
 }
 
 #[derive(Debug, Args)]
-pub struct SearchCommand {
+pub struct FindCommand {
     /// Enter the string that should be searched
     pub search_query: String,
     /// Search case insensitive [default value = true]
@@ -50,11 +50,11 @@ pub struct SearchCommand {
     pub search_case_insensitive: bool,
     #[clap(subcommand)]
     /// Specify the search further
-    pub command: SearchSubcommand,
+    pub command: FindSubcommand,
 }
 
 #[derive(Debug, Subcommand)]
-pub enum SearchSubcommand {
+pub enum FindSubcommand {
     /// Search in a specified directory
     Dir(SelectDirCommand),
     /// Search your whole computer (it takes very (very) long)
