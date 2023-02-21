@@ -1,10 +1,10 @@
 mod args;
 
 use std::process;
-use minigrep::{OperationResult, run};
+use search::{OperationResult, run};
 
 fn main() {
-    minigrep::start_screen();
+    search::start_screen();
 
     let result: OperationResult = match run() {
         Err(e) => {
@@ -16,5 +16,5 @@ fn main() {
         }
     };
 
-    minigrep::display_results(result);
+    search::display_results(result);
 }
