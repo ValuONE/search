@@ -8,6 +8,7 @@ edition = "2021"
 [dependencies]
 
 walkdir = "2"
+jwalk = "0.8.1"
 fstream = "0.1.2"
 indicatif = "0.17.3"
 clap = { version = "4.1.6", features = ["derive"] }
