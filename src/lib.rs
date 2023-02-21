@@ -9,7 +9,7 @@ use clap::Parser;
 
 use walkdir::WalkDir;
 use crate::args::SearchArgs;
-use crate::args::EntityType::{Locate, Search};
+use crate::args::EntityType::{Locate, Find};
 use std::time::{Duration, Instant};
 
 use indicatif::{HumanDuration, ProgressBar, ProgressStyle};
@@ -65,13 +65,13 @@ pub fn convert(args: SearchArgs) -> Config {
                 }
             }
         },
-        Search(command) => {
+        Find(command) => {
             config.query_or_filename = command.search_query;
             config.case_insensitive = command.search_case_insensitive;
 
             match command.command {
-                args::SearchSubcommand::All => {},
-                args::SearchSubcommand::Dir(select) => {
+                args::FindSubcommand::All => {},
+                args::FindSubcommand::Dir(select) => {
                     config.dir.push(select.dir);
                 }
             }
