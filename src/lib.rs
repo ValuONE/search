@@ -8,15 +8,15 @@ use std::path::Path;
 use clap::Parser;
 
 use walkdir::WalkDir;
-use crate::args::MinigrepArgs;
+use crate::args::SearchArgs;
 use crate::args::EntityType::{Locate, Search};
 use std::time::{Duration, Instant};
 
 use indicatif::{HumanDuration, ProgressBar, ProgressStyle};
 
 pub fn run() -> Result<OperationResult, Box<dyn Error>> {
-    let minigrep_args = MinigrepArgs::parse();
-    let config = convert(minigrep_args);
+    let search_args = SearchArgs::parse();
+    let config = convert(search_args);
     
     let result = search(
         config.is_locate,
@@ -45,7 +45,7 @@ pub fn display_results(results: OperationResult) {
     }
 }
 
-pub fn convert(args: MinigrepArgs) -> Config {
+pub fn convert(args: SearchArgs) -> Config {
     let mut config: Config = Config {
         is_locate: false,
         query_or_filename: "".to_string(),
@@ -83,15 +83,14 @@ pub fn convert(args: MinigrepArgs) -> Config {
 
 pub fn start_screen() {
     print!(r"
-    
-        __  ________   ________________  __________ 
-       /  |/  /  _/ | / /  _/ ____/ __ \/ ____/ __ \
-      / /|_/ // //  |/ // // / __/ /_/ / __/ / /_/ /
-     / /  / // // /|  // // /_/ / _, _/ /___/ ____/ 
-    /_/  /_/___/_/ |_/___/\____/_/ |_/_____/_/      
-   
+
+   _____ _________    ____  ________  __
+  / ___// ____/   |  / __ \/ ____/ / / /
+  \__ \/ __/ / /| | / /_/ / /   / /_/ /
+ ___/ / /___/ ___ |/ _, _/ /___/ __  /
+/____/_____/_/  |_/_/ |_|\____/_/ /_/
                                                 
-Thanks for using minigrep! Mady by Valu
+Thanks for using search! Mady by Valu
 
 -------------------------------------------------------------------------
 
