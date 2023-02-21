@@ -3,7 +3,6 @@ extern crate walkdir;
 mod args;
 
 use std::error::Error;
-use std::fs;
 use std::path::Path;
 use clap::Parser;
 
@@ -219,28 +218,35 @@ pub fn search(is_locate: bool, query_or_filename: &str, case_insensitive: bool, 
         for e in not_locate {
             pb.inc(1);
             if !is_locate {
-                let search_result: SearchResult;
-                let contents = match fs::read_to_string(&e) {
-                    Err(_e) => {continue}
-                    Ok(value) => {value}
-                };
+                match fstream::contains(&e, query_or_filename) {
+                    Some(b) => {
+                        if b {
+                            let search_result: SearchResult;
+                            let contents = match fstream::read_text(&e) {
+                                None => continue,
+                                Some(value) => value
+                            };
 
-                if case_insensitive {
-                    search_result = search_case_insensitive(query_or_filename, &contents);
-                } else {
-                    search_result = search_case_sensitive(query_or_filename, &contents)
-                }
+                            if case_insensitive {
+                                search_result = search_case_insensitive(query_or_filename, &contents);
+                            } else {
+                                search_result = search_case_sensitive(query_or_filename, &contents)
+                            }
 
-                if !search_result.line.is_empty() {
-                    result.filename.push(e.to_string());
+                            if !search_result.line.is_empty() {
+                                result.filename.push(e.to_string());
 
-                    for i in 0..search_result.line.len() {
-                        let cur_content = search_result.content[i].clone();
-                        let cur_line = search_result.line[i];
+                                for i in 0..search_result.line.len() {
+                                    let cur_content = search_result.content[i].clone();
+                                    let cur_line = search_result.line[i];
 
-                        result.content.push(cur_content);
-                        result.line.push(cur_line);
+                                    result.content.push(cur_content);
+                                    result.line.push(cur_line);
+                                }
+                            }
+                        }
                     }
+                    None => continue,
                 }
             }
         }
