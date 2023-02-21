@@ -92,6 +92,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "fstream"
+version = "0.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "fd3bf8db348c3dd17bb0cab30faa4284d70570d2a1e1ec08d52e06e4613de596"
+
+[[package]]
 name = "heck"
 version = "0.4.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -249,6 +255,7 @@ name = "search"
 version = "0.1.0"
 dependencies = [
  "clap",
+ "fstream",
  "indicatif",
  "walkdir",
 ]
