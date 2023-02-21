@@ -2,13 +2,12 @@
     <img src="https://www.citypng.com/public/uploads/small/116404390591jnmiepcahcaeehx3rcg8ctrl4uwsm2qhz65fknnff5liocis69reptmroenzpepwy3polhdtp7kp23tgf7myadlax0xubgkg1dv.png" width="200">
     <br>
     <br>
-    <img src="https://img.shields.io/github/v/release/ValuONE/minigrep"
+    <img src="https://img.shields.io/github/v/release/ValuONE/search"
         alt="Release">
     <img src="https://img.shields.io/badge/language-rust-red.svg" alt="Language">
-    <img src="https://github.com/ValuONE/minigrep/workflows/Publish/badge.svg" alt="Passing">
-    <img src="https://img.shields.io/github/stars/ValuONE/minigrep" alt="Stars">
-    <img src="https://img.shields.io/github/issues/ValuONE/minigrep" alt="Issues">
-    <img src="https://img.shields.io/github/forks/ValuONE/minigrep" alt="Forks">
+    <img src="https://img.shields.io/github/stars/ValuONE/search" alt="Stars">
+    <img src="https://img.shields.io/github/issues/ValuONE/search" alt="Issues">
+    <img src="https://img.shields.io/github/forks/ValuONE/search" alt="Forks">
 </p>
 
 <p align="center">
@@ -19,9 +18,10 @@
     <a href="#license">License</a>
 </p>
 
-With the intention to learn rust further, i followed some tutorials and one was about creating a little "grep" clone. 
-After a bit of coding I had so much fun, that I expanded the project with some other features...
----
+<p>
+    With the intention to learn rust further, i followed some tutorials and one was about creating a little "grep" clone. 
+    After a bit of coding I had so much fun, that I expanded the project with some other features...
+</p>
 
 ## **Key Features**
 - Search for a certain string
@@ -42,7 +42,7 @@ Alternatively you can download the repository and compile it yourself.
 
 ``` bash
 # Clone the repository
-git clone https://github.com/ValuONE/minigrep
+git clone https://github.com/ValuONE/search
 
 # Build the project
 cargo build --release
