@@ -409,6 +409,7 @@ dependencies = [
  "fstream",
  "indicatif",
  "jwalk",
+ "num_cpus",
  "walkdir",
 ]
 

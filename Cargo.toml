@@ -10,5 +10,6 @@ edition = "2021"
 walkdir = "2"
 jwalk = "0.8.1"
 fstream = "0.1.2"
+num_cpus = "1.15.0"
 indicatif = "0.17.3"
 clap = { version = "4.1.6", features = ["derive"] }
