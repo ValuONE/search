@@ -1,9 +1,12 @@
 extern crate walkdir;
+extern crate num_cpus;
 
 mod args;
 
 use std::error::Error;
 use std::path::Path;
+use std::thread;
+use std::thread::{JoinHandle, Thread};
 use clap::Parser;
 
 use jwalk::{Parallelism};
@@ -16,7 +19,7 @@ use indicatif::{HumanDuration, ProgressBar, ProgressStyle};
 pub fn run() -> Result<OperationResult, Box<dyn Error>> {
     let search_args = SearchArgs::parse();
     let config = convert(search_args);
-    
+
     let result = search(
         config.is_locate,
         &*config.query_or_filename,
@@ -123,7 +126,7 @@ pub fn search_case_sensitive(query: &str, contents: &str) -> SearchResult {
     };
 
     let mut count: i32 = 0;
-    
+
     for line in contents.lines() {
         count += 1;
         if line.contains(query) {
@@ -143,7 +146,7 @@ pub fn search_case_insensitive(query: &str, contents: &str) -> SearchResult {
 
     let mut count: i32 = 0;
     let query = query.to_lowercase();
-    
+
     for line in contents.lines() {
         count += 1;
         if line.to_lowercase().contains(&query) {
@@ -210,7 +213,7 @@ pub fn search(is_locate: bool, query_or_filename: &str, case_insensitive: bool, 
                     return Some(true);
                 }
                 None
-        }).count();
+            }).count();
     }
 
     pb.finish_with_message(format!("Scanned through {} files in {} \n", result.files_count,HumanDuration(started.elapsed())));
@@ -218,42 +221,40 @@ pub fn search(is_locate: bool, query_or_filename: &str, case_insensitive: bool, 
     if !is_locate {
         println!("\n Searching in files now...\n");
 
-        let pb = ProgressBar::new(result.files_count);
+        let mut threads: Vec<JoinHandle<()>> = vec![];
+        let mut num: usize = num_cpus::get();
 
-        for e in not_locate {
-            pb.inc(1);
-            if !is_locate {
-                match fstream::contains(&e, query_or_filename) {
-                    Some(b) => {
-                        if b {
-                            let search_result: SearchResult;
-                            let contents = match fstream::read_text(&e) {
-                                None => continue,
-                                Some(value) => value
-                            };
+        if num > 1 {
+            num = num / 2 as usize
+        }
 
-                            if case_insensitive {
-                                search_result = search_case_insensitive(query_or_filename, &contents);
-                            } else {
-                                search_result = search_case_sensitive(query_or_filename, &contents)
-                            }
+        let each_num = not_locate.len() / num as usize;
 
-                            if !search_result.line.is_empty() {
-                                result.filename.push(e.to_string());
+        let mut start_num = 0;
+        let mut end_num = each_num;
 
-                                for i in 0..search_result.line.len() {
-                                    let cur_content = search_result.content[i].clone();
-                                    let cur_line = search_result.line[i];
+        for i in 0..num - 1 {
+            let copy_locate = not_locate.clone();
+            threads.push(
+                thread::spawn(move || {
+                    let data = in_file_search(start_num, end_num, copy_locate, case_insensitive);
+                })
+            );
 
-                                    result.content.push(cur_content);
-                                    result.line.push(cur_line);
-                                }
-                            }
-                        }
-                    }
-                    None => continue,
-                }
-            }
+            start_num = end_num;
+            end_num = end_num + each_num;
+        }
+
+        let last_entries = not_locate.len() - end_num as usize;
+
+        threads.push(
+            thread::spawn(move || {
+                let data = in_file_search(last_entries, not_locate.len(), not_locate.clone(), case_insensitive);
+            })
+        );
+
+        for thread in threads {
+            thread.join().unwrap();
         }
 
         pb.finish();
@@ -262,6 +263,55 @@ pub fn search(is_locate: bool, query_or_filename: &str, case_insensitive: bool, 
     }
 
     Ok(result)
+}
+
+fn in_file_search(start: usize, end: usize, file_list: Vec<String>, case_insensitive: bool) -> OperationResult {
+    let mut result = OperationResult {
+        is_locate: true,
+        filename: vec![],
+        content: vec![],
+        line: vec![],
+        files_count: 0,
+    };
+
+    let query_or_filename = "test";
+
+    for i in start..end {
+        let e = file_list[i].clone();
+
+        match fstream::contains(&e, &query_or_filename) {
+            Some(b) => {
+                if b {
+                    let search_result: SearchResult;
+                    let contents = match fstream::read_text(&e) {
+                        None => continue,
+                        Some(value) => value
+                    };
+
+                    if case_insensitive {
+                        search_result = search_case_insensitive(&query_or_filename, &contents);
+                    } else {
+                        search_result = search_case_sensitive(&query_or_filename, &contents)
+                    }
+
+                    if !search_result.line.is_empty() {
+                        result.filename.push(e.to_string());
+
+                        for i in 0..search_result.line.len() {
+                            let cur_content = search_result.content[i].clone();
+                            let cur_line = search_result.line[i];
+
+                            result.content.push(cur_content);
+                            result.line.push(cur_line);
+                        }
+                    }
+                }
+            }
+            None => continue,
+        }
+    }
+
+    result
 }
 
 fn get_drive_letters() -> Vec<String> {
@@ -273,15 +323,15 @@ fn get_drive_letters() -> Vec<String> {
         }
     }
 
-    exit_letter_vec    
+    exit_letter_vec
 }
 
 static HARD_DRIVE_NAMES: [&str; 26] = [
-    "A:\\", "B:\\", "C:\\", "D:\\", "E:\\", 
-    "F:\\", "G:\\", "H:\\", "I:\\", "J:\\", 
+    "A:\\", "B:\\", "C:\\", "D:\\", "E:\\",
+    "F:\\", "G:\\", "H:\\", "I:\\", "J:\\",
     "K:\\", "L:\\", "M:\\", "N:\\", "O:\\",
-    "P:\\", "Q:\\", "R:\\", "S:\\", "Z:\\", 
-    "U:\\", "V:\\", "W:\\", "X:\\", "Y:\\", 
+    "P:\\", "Q:\\", "R:\\", "S:\\", "Z:\\",
+    "U:\\", "V:\\", "W:\\", "X:\\", "Y:\\",
     "Z:\\",
 ];
 
