@@ -32,7 +32,7 @@
 
 ## **Installation**
 
-If you just want to use the tool, you can download the [latest release]() and execute it via a command line.
+If you just want to use the tool, you can download the [latest release](https://github.com/ValuONE/search/releases/tag/v1.0.0-beta) and execute it via a command line.
 
 ``` bash
 # Locate the search.exe and execute it
