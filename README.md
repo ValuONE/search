@@ -15,12 +15,13 @@
     <a href="#installation">Installation</a> •
     <a href="#usage">Usage</a> •
     <a href="#to-do">To-Do</a> •
+    <a href="#to-do">Contributors</a> •
     <a href="#license">License</a>
 </p>
 
 <p>
-    With the intention to learn rust further, i followed some tutorials and one was about creating a little "grep" clone. 
-    After a bit of coding I had so much fun, that I expanded the project with some other features...
+    With the intention to learn rust further, we followed some tutorials and one was about creating a little "grep" clone. 
+    After a bit of coding we had so much fun, that we expanded the project further...
 </p>
 
 ## **Key Features**
@@ -31,7 +32,7 @@
 
 ## **Installation**
 
-If you just want to use the tool, you can download the latest release and execute it via cmd etc.
+If you just want to use the tool, you can download the [latest release]() and execute it via a command line.
 
 ``` bash
 # Locate the search.exe and execute it
@@ -48,7 +49,7 @@ git clone https://github.com/ValuONE/search
 cargo build --release
 
 ```
-It will create a executable in `target/release`!
+It will create an executable in `target/release`!
 
 Or simply do
 
@@ -77,6 +78,13 @@ Options:
 
 - [ ] Increase find/locate speed
 - [ ] Increase user-friendliness
+
+---
+
+## Contributors
+
+- [Lume](https://github.com/Lume1234)
+- [valu](https://github.com/ValuONE)
 
 ---
 
