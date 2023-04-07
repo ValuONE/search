@@ -16,6 +16,7 @@ impl Default for Config {
     }
 }
 
+#[derive(PartialEq)]
 pub enum SearchType {
     LocateFile,
     FindString
