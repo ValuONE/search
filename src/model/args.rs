@@ -14,7 +14,7 @@ pub struct SearchArgs {
 }
 
 impl SearchArgs {
-    fn convert_to_config(&self) -> Config {
+    pub fn convert_to_config(&self) -> Config {
         let mut config = Config::default();
 
         match &self.entity_type {
