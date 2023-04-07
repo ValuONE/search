@@ -6,7 +6,7 @@ use crate::model::config::SearchType;
 use crate::model::config::SearchType::{FindString, LocateFile};
 use crate::model::results::{FinalResult, SearchResult};
 
-pub fn search(dirs: Vec<String>, query: &str, search_type: SearchType) -> FinalResult {
+pub fn search(dirs: Vec<String>, query: &str, search_type: SearchType, sensitive: bool) -> FinalResult {
     let mut result = FinalResult::default();
 
     for dir in dirs {
@@ -19,7 +19,8 @@ pub fn search(dirs: Vec<String>, query: &str, search_type: SearchType) -> FinalR
                 if dir_entry.file_type().is_file() {
                     result.file_count += 1;
 
-                    if search_type == LocateFile && dir_entry.file_name() == query {
+                    if !sensitive && search_type == LocateFile && dir_entry.file_name() == query ||
+                        sensitive && search_type == LocateFile && dir_entry.file_name().to_ascii_lowercase().as_os_str() == query.to_lowercase().as_str() {
                         result.results.push(SearchResult {
                             filename: vec![
                                 dir_entry.path().display().to_string()
@@ -31,7 +32,7 @@ pub fn search(dirs: Vec<String>, query: &str, search_type: SearchType) -> FinalR
                     if search_type == FindString {
                         match read_to_string(dir_entry.path()) {
                             Ok(content) => {
-                                let mut content_result = content_search::search(query, &*content, false);
+                                let mut content_result = content_search::search(query, &*content, sensitive);
 
                                 if !content_result.content.is_empty() {
                                     content_result.filename.push(
