@@ -19,8 +19,9 @@ fn main() {
             dirs.push(dir);
         }
     }
+    println!("hello");
 
-    let final_result = file_search::search(dirs, &*config.query, config.search_type);
+    let final_result = file_search::search(dirs, &*config.query, config.search_type, config.case_sensitive);
 
     println!("{:#?}", final_result);
 }
