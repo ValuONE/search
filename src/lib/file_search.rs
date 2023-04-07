@@ -1,6 +1,5 @@
 use std::fs::read_to_string;
 use jwalk::{Parallelism};
-use crate::lib::cli_feedback::setup_progress_indication;
 
 use crate::lib::content_search;
 use crate::model::config::SearchType;
