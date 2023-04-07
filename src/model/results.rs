@@ -1,3 +1,4 @@
+#[derive(Debug)]
 pub struct FinalResult {
     pub file_count: i64,
     pub results: Vec<SearchResult>
@@ -12,6 +13,7 @@ impl Default for FinalResult {
     }
 }
 
+#[derive(Debug)]
 pub struct SearchResult {
     pub filename: Vec<String>,
     pub content: Vec<String>,
