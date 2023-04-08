@@ -1,7 +1,11 @@
 [package]
 name = "search"
-version = "0.1.0"
+version = "1.0.0-beta"
 edition = "2021"
+description = "A recursive search tool to locate files or find certain strings in files"
+repository = "https://github.com/ValuONE/search"
+keywords = ["search", "find", "locate"]
+categories = ["command-line-utilities", ]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
