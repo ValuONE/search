@@ -1,6 +1,6 @@
 [package]
 name = "search"
-version = "1.0.1"
+version = "1.1.0"
 edition = "2021"
 description = "A recursive search tool to locate files or find certain strings in files"
 repository = "https://github.com/ValuONE/search"

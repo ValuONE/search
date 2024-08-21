@@ -14,7 +14,6 @@
     <a href="#key-features">Key Features</a> •
     <a href="#installation">Installation</a> •
     <a href="#usage">Usage</a> •
-    <a href="#to-do">To-Do</a> •
     <a href="#to-do">Contributors</a> •
     <a href="#license">License</a>
 </p>
@@ -32,7 +31,7 @@
 
 ## **Installation**
 
-If you just want to use the tool, you can download the [latest release](https://github.com/ValuONE/search/releases/tag/v1.0.0-beta) and execute it via a command line.
+If you just want to use the tool, you can download the [latest release](https://github.com/ValuONE/search/releases/tag/v1.1.0) and execute it via a command line.
 
 ``` bash
 # Locate the search.exe and execute it
@@ -73,14 +72,6 @@ Options:
   -V, --version  Print version
 ```
 ---
-
-## **TO-DO**
-
-- [ ] Increase find/locate speed
-- [ ] Increase user-friendliness
-
----
-
 ## Contributors
 
 - [Lume](https://github.com/Lume1234)
