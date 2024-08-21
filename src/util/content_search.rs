@@ -5,18 +5,20 @@ pub fn search(query: &str, content: &str, sensitive: bool) -> SearchResult {
     let mut line_count: i64 = 0;
 
     if !sensitive {
-        query.to_lowercase();
-        content.to_lowercase();
+        let _ = query.to_lowercase();
+        let _ = content.to_lowercase();
     }
 
     if content.contains(query) {
-        for mut line in content.lines() {
+        for line in content.lines() {
             line_count += 1;
 
-            if line.contains(query) {
-                search_result.content.push(line.to_string());
-                search_result.line.push(line_count);
+            if !line.contains(query) {
+                continue;
             }
+            
+            search_result.content.push(line.to_string());
+            search_result.line.push(line_count);
         }
     }
 

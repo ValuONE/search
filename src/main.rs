@@ -1,13 +1,13 @@
 mod model;
-mod lib;
+mod util;
 mod test;
 
 use std::time::Instant;
 use crate::model::args::SearchArgs;
 use clap::Parser;
-use crate::lib::cli_feedback::setup_progress_indication;
-use crate::lib::file_search;
-use crate::lib::utility::get_drive_letter;
+use crate::util::cli_feedback::setup_progress_indication;
+use crate::util::file_search;
+use crate::util::letter::get_drive_letter;
 
 fn main() {
     let config = SearchArgs::parse().convert_to_config();
