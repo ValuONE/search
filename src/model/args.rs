@@ -5,6 +5,8 @@ use clap::{
 };
 
 use crate::model::config::{Config, SearchType};
+use crate::util::cli_feedback::setup_progress_indication;
+use crate::util::letter::get_drive_letter;
 
 #[derive(Debug, Parser)]
 #[clap(author, version, about)]
@@ -23,8 +25,8 @@ impl SearchArgs {
                 config.query = locate_command.filename.clone();
 
                 match &locate_command.command {
-                    LocateSubcommand::Dir(dir_command) => config.dir = Some(dir_command.dir.clone()),
-                    LocateSubcommand::All => config.dir = None
+                    LocateSubcommand::Dir(dir_command) => config.dirs = vec![dir_command.dir.clone()],
+                    LocateSubcommand::All => config.dirs = get_drive_letter()
                 }
             }
             EntityType::Find(find_command) => {
@@ -32,11 +34,13 @@ impl SearchArgs {
                 config.query = find_command.search_query.clone();
 
                 match &find_command.command {
-                    FindSubcommand::Dir(dir_command) => config.dir = Some(dir_command.dir.clone()),
-                    FindSubcommand::All => config.dir = None
+                    FindSubcommand::Dir(dir_command) => config.dirs = vec![dir_command.dir.clone()],
+                    FindSubcommand::All => config.dirs = get_drive_letter()
                 }
             }
         }
+
+        config.progress_bar = Some(setup_progress_indication(format!("Searching for {}", config.query)));
 
         config
     }

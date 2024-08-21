@@ -1,4 +1,4 @@
-use crate::model::results::SearchResult;
+use crate::model::search_result::SearchResult;
 
 pub fn search(query: &str, content: &str, sensitive: bool) -> SearchResult {
     let mut search_result =  SearchResult::default();

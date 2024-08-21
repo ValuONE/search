@@ -1,10 +1,11 @@
+use jwalk::Parallelism;
 use std::fs::read_to_string;
-use jwalk::{Parallelism};
 
-use crate::util::content_search;
 use crate::model::config::SearchType;
 use crate::model::config::SearchType::{FindString, LocateFile};
-use crate::model::results::{FinalResult, SearchResult};
+use crate::model::final_result::FinalResult;
+use crate::model::search_result::SearchResult;
+use crate::util::content_search;
 
 pub fn search(dirs: Vec<String>, query: &str, search_type: SearchType, sensitive: bool) -> FinalResult {
     let mut result = FinalResult::default();
