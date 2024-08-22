@@ -13,5 +13,6 @@ license = "MIT"
 [dependencies]
 
 jwalk = "0.8.1"
+disk-name = "1.0.0"
 indicatif = "0.17.8"
 clap = { version = "4.5.8", features = ["derive"] }

@@ -3,10 +3,9 @@ use clap::{
     Parser,
     Subcommand,
 };
-
+use disk_name::get_letters;
 use crate::model::config::{Config, SearchType};
 use crate::util::cli_feedback::setup_progress_indication;
-use crate::util::letter::get_drive_letter;
 
 #[derive(Debug, Parser)]
 #[clap(author, version, about)]
@@ -18,7 +17,7 @@ pub struct SearchArgs {
 impl SearchArgs {
     pub fn convert_to_config(&self) -> Config {
         let mut config = Config::default();
-        let d_letters = get_drive_letter();
+        let d_letters = get_letters();
 
         match &self.entity_type {
             EntityType::Locate(locate_command) => {
